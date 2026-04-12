@@ -1,0 +1,7 @@
+.DS_Store
+.env
+*.log
+node_modules/
+
+# Assembled page — regenerate with `npm run build` (CI does this on push).
+dist/index.html
