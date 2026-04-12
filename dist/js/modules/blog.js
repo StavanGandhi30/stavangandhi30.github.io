@@ -43,7 +43,7 @@ export class BlogSection {
     } catch {
       if (intro) intro.setAttribute('hidden', '');
       root.innerHTML =
-        '<p class="text-sm text-stone-600 dark:text-stone-400">Posts couldn’t load. From the repo root run <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">npm run dev</code> to preview <code class="text-xs">public/</code>, or <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">npm run build</code> and open <code class="text-xs">dist/index.html</code> (posts are embedded there).</p>';
+        '<p class="text-sm text-stone-600 dark:text-stone-400">Posts couldn’t load. Run <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">npm run build</code> so posts are embedded in <code class="text-xs">dist/index.html</code>, or serve <code class="text-xs">dist/</code> over HTTP with <code class="text-xs">data/blogs.json</code> present.</p>';
       this.notifyDomUpdate();
       return;
     }

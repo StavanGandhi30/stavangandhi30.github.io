@@ -2,9 +2,7 @@
   "name": "stavan-gandhi-site",
   "private": true,
   "scripts": {
-    "build": "node scripts/build.js",
-    "preview": "npm run build && npx --yes serve dist -l 8080",
-    "dev": "npm run build && npx --yes serve dist -l 8080"
+    "build": "node scripts/build.js"
   },
   "engines": {
     "node": ">=18"

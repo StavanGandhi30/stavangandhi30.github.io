@@ -1,9 +1,10 @@
-# Build dist/ and publish to GitHub Pages (user/org site: https://stavangandhi30.github.io/)
+# Build dist/ and publish to GitHub Pages (https://stavangandhi30.github.io/)
 name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main, master]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -27,6 +28,9 @@ jobs:
       - name: Build site
         run: npm run build
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -40,4 +44,4 @@ jobs:
     steps:
       - name: Deploy to Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
