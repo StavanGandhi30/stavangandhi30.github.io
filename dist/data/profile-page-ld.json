@@ -1,0 +1,12 @@
+{
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  "mainEntity": {
+    "@type": "Person",
+    "name": "Stavan Gandhi",
+    "url": "https://stavangandhi30.github.io/",
+    "image": "https://stavangandhi30.github.io/images/photos/profile.png",
+    "jobTitle": "Founder",
+    "description": "Founder and engineer focused on AI, robotics, and health."
+  }
+}

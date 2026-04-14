@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "logo": "images/logos/tetr-logo.png",
+      "school": "Tetr College of Business",
+      "degree": "Master in Management of Technology (MiM)",
+      "dates": "Class of 2027 · Shanghai · Dubai · Madrid",
+      "description": "The Master in Management of Technology is a one-year, full-time graduate program that moves cohorts through China, Dubai, and Madrid—blending business, technology, and AI-related coursework with term-long venture projects and immersions in each region's companies and markets. It is aimed at recent graduates who want international exposure and execution-heavy management training outside a traditional multi-year, single-campus MBA path.",
+      "programUrl": "https://tetr.com/masters-management-of-technology",
+      "highlights": []
+    },
+    {
+      "logo": "images/logos/depaul-logo.png",
+      "school": "DePaul University",
+      "degree": "B.Sc. in Computer Science (AI concentration)",
+      "dates": "Class of 2026 · Chicago Loop",
+      "description": "DePaul's Bachelor of Science in Computer Science with an Artificial Intelligence concentration combines core CS foundations, algorithms, systems, languages, and software engineering, with focused study in machine learning, natural language processing, knowledge representation, and intelligent systems, preparing graduates for technical roles where AI is central to the product or research stack.",
+      "programUrl": "https://www.depaul.edu/academics/programs/bs-in-computer-science",
+      "highlights": [
+        "Founder & President of DePaul's RoboTech Society",
+        "Member of The National Society of Leadership and Success (NSLS)"
+      ]
+    }
+  ]
+}

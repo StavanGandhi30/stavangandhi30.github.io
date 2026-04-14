@@ -1,0 +1,21 @@
+{
+  "shuffle": true,
+  "items": [
+    {
+      "src": "images/photos/research-bci-lab.png",
+      "alt": "BCI lab research setup"
+    },
+    {
+      "src": "images/photos/research-bci-cobot.png",
+      "alt": "Collaborative robot in the lab"
+    },
+    {
+      "src": "images/photos/ganance-app-mockups.png",
+      "alt": "Product mockups"
+    },
+    {
+      "src": "images/photos/humanoid_video_preview.png",
+      "alt": "Humanoid robotics preview"
+    }
+  ]
+}

@@ -1,10 +1,4 @@
 {
   "name": "stavan-gandhi-site",
-  "private": true,
-  "scripts": {
-    "build": "node scripts/build.js"
-  },
-  "engines": {
-    "node": ">=18"
-  }
+  "private": true
 }

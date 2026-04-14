@@ -3,15 +3,15 @@
     {
       "id": "default-alive-problems-worth-solving",
       "title": "Default Alive: Building Toward Problems Worth Solving",
-      "excerpt": "The best founders I study don’t start with a slide deck—they start with tension: a gap between how the world works and how it could work.",
-      "content": "<p>The best founders I study don’t start with a slide deck—they start with <em>tension</em>: a gap between how the world works and how it could work. That tension is what keeps you learning fast when nothing is handed to you.</p><p>For me, entrepreneurship isn’t a title. It’s a bias toward building: turning ambiguous constraints into systems people can rely on. Whether it’s wearable health data, robotics, or analytics, the through-line is the same—ship, measure, refine, repeat.</p><p>As I think about graduate management education, I’m looking for frameworks that sharpen judgment: capital allocation, operating cadence, and how to scale human organizations alongside technology. The goal isn’t to stop building—it’s to build with more leverage.</p>",
+      "excerpt": "The best founders I study don't start with a slide deck—they start with tension: a gap between how the world works and how it could work.",
+      "content": "<p>The best founders I study don't start with a slide deck—they start with <em>tension</em>: a gap between how the world works and how it could work. That tension is what keeps you learning fast when nothing is handed to you.</p><p>For me, entrepreneurship isn't a title. It's a bias toward building: turning ambiguous constraints into systems people can rely on. Whether it's wearable health data, robotics, or analytics, the through-line is the same—ship, measure, refine, repeat.</p><p>As I think about graduate management education, I'm looking for frameworks that sharpen judgment: capital allocation, operating cadence, and how to scale human organizations alongside technology. The goal isn't to stop building—it's to build with more leverage.</p>",
       "tags": ["Entrepreneurship", "Leadership", "Strategy"],
       "date": "2025-11-02T14:00:00.000Z"
     },
     {
       "id": "from-signals-to-actions-ai-in-the-loop",
       "title": "From Signals to Actions: AI in the Loop, Not on the Slide",
-      "excerpt": "Models are easy to demo. Reliable pipelines that change behavior are not. Here’s how I think about AI when the cost of being wrong is real.",
+      "excerpt": "Models are easy to demo. Reliable pipelines that change behavior are not. Here's how I think about AI when the cost of being wrong is real.",
       "content": "<p>Models are easy to demo. Reliable pipelines that change behavior are not. When I work on NLP analytics or signal processing for robotics, I care about three questions: What decision does this enable? What fails first? How does a human supervise it?</p><p>That mindset comes from shipping features in the real world—where latency, noise, and edge cases dominate the story. AI becomes valuable when it compresses time-to-insight or expands what a small team can operate—not when it replaces judgment entirely.</p><p>My technical foundation (Python, ML tooling, APIs) is there to support product outcomes: clearer feedback loops, safer automation, and experiences that feel obvious once they exist.</p>",
       "tags": ["AI", "Product", "Systems"],
       "date": "2025-10-18T10:30:00.000Z"
@@ -19,16 +19,16 @@
     {
       "id": "robotics-as-a-training-ground-for-operators",
       "title": "Robotics as a Training Ground for Operators",
-      "excerpt": "A robot in the wild is a lesson in integration: sensors, software, physics, and people who don’t care about your assumptions.",
-      "content": "<p>A robot in the wild is a lesson in integration: sensors, software, physics, and people who don’t care about your assumptions. Leading <strong>RoboTech Society</strong> taught me that community is also infrastructure—recruiting, teaching, and aligning contributors around a shared standard of quality.</p><p>Humanoid systems and BCI work pushed me into uncomfortable signal processing problems: noise, calibration, real-time control. Those problems reward patience and documentation—habits that transfer directly to building companies.</p><p>If you can debug a system where the “user” is a motor, a neural signal, and a deadline, you learn to respect operational reality. That’s the same muscle you need when scaling a team or a product line.</p>",
+      "excerpt": "A robot in the wild is a lesson in integration: sensors, software, physics, and people who don't care about your assumptions.",
+      "content": "<p>A robot in the wild is a lesson in integration: sensors, software, physics, and people who don't care about your assumptions. Leading <strong>RoboTech Society</strong> taught me that community is also infrastructure—recruiting, teaching, and aligning contributors around a shared standard of quality.</p><p>Humanoid systems and BCI work pushed me into uncomfortable signal processing problems: noise, calibration, real-time control. Those problems reward patience and documentation—habits that transfer directly to building companies.</p><p>If you can debug a system where the “user” is a motor, a neural signal, and a deadline, you learn to respect operational reality. That's the same muscle you need when scaling a team or a product line.</p>",
       "tags": ["Robotics", "Leadership", "Operations"],
       "date": "2025-09-05T16:45:00.000Z"
     },
     {
       "id": "management-education-as-a-multiplier",
-      "title": "Why I’m Pursuing Management Education (As a Builder)",
+      "title": "Why I'm Pursuing Management Education (As a Builder)",
       "excerpt": "Technical depth gets you in the room. Judgment keeps you there. Management training is how I intend to multiply what I can build next.",
-      "content": "<p>Technical depth gets you in the room. Judgment keeps you there. I’m pursuing a <strong>Master in Management</strong> orientation not to leave technology behind, but to pair it with a stronger command of markets, organizations, and capital.</p><p>The founders I admire can read a P&amp;L, tell a true story with data, and design an operating rhythm that makes teams faster—not busier. That’s the skill stack I’m deliberately building.</p><p>My north star is simple: build products that improve health and human capability, and assemble the people, processes, and partnerships required to scale them responsibly.</p>",
+      "content": "<p>Technical depth gets you in the room. Judgment keeps you there. I'm pursuing a <strong>Master in Management</strong> orientation not to leave technology behind, but to pair it with a stronger command of markets, organizations, and capital.</p><p>The founders I admire can read a P&amp;L, tell a true story with data, and design an operating rhythm that makes teams faster—not busier. That's the skill stack I'm deliberately building.</p><p>My north star is simple: build products that improve health and human capability, and assemble the people, processes, and partnerships required to scale them responsibly.</p>",
       "tags": ["Management", "Career", "Vision"],
       "date": "2025-08-22T09:00:00.000Z"
     },
@@ -36,7 +36,7 @@
       "id": "wearables-and-the-next-layer-of-preventive-care",
       "title": "Wearables and the Next Layer of Preventive Care",
       "excerpt": "When continuous data becomes normal, the opportunity shifts from collection to interpretation—and from dashboards to behavior change.",
-      "content": "<p>When continuous data becomes normal, the opportunity shifts from collection to interpretation—and from dashboards to behavior change. Working on wearable-adjacent mobile and backend systems reinforced how much product quality lives in the details: sync reliability, trust, and clarity for non-expert users.</p><p>Healthcare intersects with everything I care about: messy data, high stakes, and outcomes that matter over years, not sprint cycles. I’m interested in businesses that earn retention through usefulness, not notifications.</p><p>The next wave of value will belong to teams that combine clinical rigor, consumer-grade UX, and disciplined execution. That’s the kind of company I’m preparing to build or join.</p>",
+      "content": "<p>When continuous data becomes normal, the opportunity shifts from collection to interpretation—and from dashboards to behavior change. Working on wearable-adjacent mobile and backend systems reinforced how much product quality lives in the details: sync reliability, trust, and clarity for non-expert users.</p><p>Healthcare intersects with everything I care about: messy data, high stakes, and outcomes that matter over years, not sprint cycles. I'm interested in businesses that earn retention through usefulness, not notifications.</p><p>The next wave of value will belong to teams that combine clinical rigor, consumer-grade UX, and disciplined execution. That's the kind of company I'm preparing to build or join.</p>",
       "tags": ["Healthcare", "Product", "Data"],
       "date": "2025-07-14T11:20:00.000Z"
     }

@@ -1,0 +1,103 @@
+{
+  "items": [
+    {
+      "org": "Ganance Inc.",
+      "role": "Mobile Developer · Contract",
+      "date": "June 2025 - Present",
+      "links": [
+        {
+          "label": "Ganance website",
+          "href": "https://ganance.com/"
+        },
+        {
+          "label": "Ganance on the App Store",
+          "href": "https://apps.apple.com/us/app/ganance/id6472748227"
+        }
+      ],
+      "media": {
+        "type": "carousel",
+        "ariaLabel": "Ganance app on five phone screens: silent alarm, alerts, daily steps dashboard, weekly activity trends, and a water reminder.",
+        "figureClass": "mt-6 overflow-hidden rounded-xl border border-stone-200 dark:border-stone-800",
+        "slides": [
+          {
+            "type": "image",
+            "src": "images/photos/ganance-app-mockups.png",
+            "alt": "Brain-computer interface lab demo video.",
+            "width": 1008,
+            "height": 440,
+            "imgClass": "w-full object-cover",
+            "caption": "Ganance app on five phone screens: silent alarm, alerts, daily steps dashboard, weekly activity trends, and a water reminder."
+          }
+        ]
+      },
+      "bullets": [
+        {
+          "title": "Mobile & sync",
+          "text": "Shipped Swift features and scalable backend work for real-time wearable data users can trust."
+        },
+        {
+          "title": "Data & pipelines",
+          "text": "Built pipelines and backend logic for steps, calories, and activity—fueling analytics and performance tuning."
+        },
+        {
+          "title": "Product partnership",
+          "text": "Turned requirements into data-backed features and analytics workflows with design and leadership."
+        }
+      ]
+    },
+    {
+      "org": "DePaul University (CyberLabs)",
+      "role": "Research Assistant · Brain-computer interfaces",
+      "date": "Mar. 2025 - Oct. 2025",
+      "media": {
+        "type": "carousel",
+        "ariaLabel": "CyberLabs BCI research — photo and demo video",
+        "figureClass": "mt-6 overflow-hidden rounded-xl border border-stone-200 dark:border-stone-800",
+        "slides": [
+          {
+            "type": "video",
+            "src": "videos/DePaulBCI.mp4",
+            "loop": true,
+            "poster": "images/photos/research-bci-cobot.png",
+            "ariaLabel": "Brain-computer interface lab demo video",
+            "caption": "Screen recording from the BCI session (loops while playing)."
+          }
+        ]
+      },
+      "description": "Explored whether neural signals could drive creative, real-world robotics—building conviction in how hard \"it works in the lab\" is to translate into products people trust."
+    },
+    {
+      "org": "DePaul University",
+      "role": "Research Assistant · Humanoid & sensing",
+      "date": "Mar. 2024 - Aug. 2025",
+      "media": {
+        "type": "carousel",
+        "ariaLabel": "Humanoid and sensing research clip from DePaul lab work.",
+        "figureClass": "mt-6 overflow-hidden rounded-xl border border-stone-200 bg-black dark:border-stone-800",
+        "slides": [
+          {
+            "type": "video",
+            "src": "https://firebasestorage.googleapis.com/v0/b/shivgandhi30.firebasestorage.app/o/video%2FHumanoid.mp4?alt=media&token=4d94bb7f-8b06-4a23-b47b-c1c5cf37dcde",
+            "loop": true,
+            "poster": "images/photos/humanoid_video_preview.png",
+            "ariaLabel": "Humanoid and sensing research clip from DePaul lab work.",
+            "caption": "Humanoid & sensing — clip from lab integration work · DePaul · 2024-2025"
+          }
+        ]
+      },
+      "description": "Environmental awareness for robots in dynamic settings—less about slides, more about integration under real constraints."
+    },
+    {
+      "org": "DePaul University (SE350)",
+      "role": "Software Developer · Stock Exchange Simulation",
+      "date": "Jan. 2025 - Mar. 2025",
+      "description": "Structured view of markets and concurrency—useful mental models for any real-time, high-stakes data business."
+    },
+    {
+      "org": "DePaul University (Senior Capstone)",
+      "role": "Project Manager & Software Developer · NLP Analytics",
+      "date": "Sep. 2024 - Nov. 2024",
+      "description": "Owned a cross-functional build: turning messy user language into insights stakeholders could act on—practice in scope, narrative, and shipping under a deadline."
+    }
+  ]
+}
