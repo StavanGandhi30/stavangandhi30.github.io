@@ -4,6 +4,9 @@ import {
   formatQuoteBold,
   initialsFromName,
   loadSiteJson,
+  loadSiteUrls,
+  resolveSiteUrl,
+  resolveSiteUrlFromRecord,
   safeHttpUrl,
   safePostDomId,
 } from './site-utils.js';
@@ -21,6 +24,12 @@ const EXP_FIGCAPTION_CLASS =
 
 const EXP_VIDEO_CLASS = 'max-h-[min(28rem,75vh)] w-full object-contain';
 const EXP_VIDEO_CLASS_CAROUSEL = 'max-h-[min(28rem,75vh)] w-full bg-black object-contain';
+let siteUrlsPromise;
+
+function getSiteUrls() {
+  if (!siteUrlsPromise) siteUrlsPromise = loadSiteUrls();
+  return siteUrlsPromise;
+}
 
 function expFigcaptionEsc(captionEscaped) {
   return captionEscaped ? `<figcaption class="${EXP_FIGCAPTION_CLASS}">${captionEscaped}</figcaption>` : '';
@@ -90,13 +99,13 @@ function bindRecommendationCardStack(stack) {
   });
 }
 
-function renderExperienceCarouselSlide(slide, expIndex, slideIndex) {
+function renderExperienceCarouselSlide(slide, expIndex, slideIndex, siteUrls) {
   if (!slide || typeof slide !== 'object') return '';
   const capEsc = escapeHtml(String(slide.caption || '').trim());
   const figCls = 'exp-carousel__figure m-0 overflow-hidden';
 
   if (slide.type === 'video') {
-    const src = safeHttpUrl(String(slide.src || ''));
+    const src = safeHttpUrl(resolveSiteUrlFromRecord(siteUrls, slide, 'srcKey', 'src'));
     if (!src) return '';
     const aria = escapeHtml(String(slide.ariaLabel || `Experience clip ${expIndex + 1} · slide ${slideIndex + 1}`));
     return renderExpVideoFigure(figCls, aria, escapeHtml(src), expPosterLoopAttrs(slide), capEsc, EXP_VIDEO_CLASS_CAROUSEL);
@@ -119,11 +128,11 @@ function renderExperienceCarouselSlide(slide, expIndex, slideIndex) {
   return '';
 }
 
-function renderExperienceCarousel(media, index) {
+function renderExperienceCarousel(media, index, siteUrls) {
   const slides = Array.isArray(media.slides) ? media.slides : [];
   const inners = [];
   slides.forEach((s, j) => {
-    const inner = renderExperienceCarouselSlide(s, index, j);
+    const inner = renderExperienceCarouselSlide(s, index, j, siteUrls);
     if (inner) inners.push(inner);
   });
   const n = inners.length;
@@ -210,17 +219,23 @@ function bindExperienceCarousels(root) {
   });
 }
 
-function renderExperienceMedia(media, index) {
+function renderExperienceMedia(media, index, siteUrls) {
   if (!media || typeof media !== 'object') return '';
   const figureClass = escapeHtml(String(media.figureClass || DEFAULT_EXP_FIGURE_CLASS));
   const captionEsc = escapeHtml(String(media.caption || '').trim());
 
   if (media.type === 'carousel') {
-    return renderExperienceCarousel(media, index);
+    const slides = Array.isArray(media.slides)
+      ? media.slides.map((slide) => ({
+          ...slide,
+          src: resolveSiteUrlFromRecord(siteUrls, slide, 'srcKey', 'src'),
+        }))
+      : [];
+    return renderExperienceCarousel({ ...media, slides }, index, siteUrls);
   }
 
   if (media.type === 'video') {
-    const src = safeHttpUrl(String(media.src || ''));
+    const src = safeHttpUrl(resolveSiteUrlFromRecord(siteUrls, media, 'srcKey', 'src'));
     if (!src) return '';
     const aria = escapeHtml(String(media.ariaLabel || `Experience clip ${index + 1}`));
     return renderExpVideoFigure(figureClass, aria, escapeHtml(src), expPosterLoopAttrs(media), captionEsc);
@@ -239,14 +254,14 @@ function renderExperienceMedia(media, index) {
   );
 }
 
-function renderExperienceLinks(links) {
+function renderExperienceLinks(links, siteUrls) {
   const items = Array.isArray(links) ? links : [];
   if (!items.length) return '';
   const linkClass =
     'underline decoration-stone-300 underline-offset-4 transition hover:decoration-stone-600 dark:decoration-stone-600 dark:hover:decoration-stone-400';
   const anchors = items
     .map((item) => {
-      const href = safeHttpUrl(String(item?.href || ''));
+      const href = safeHttpUrl(resolveSiteUrlFromRecord(siteUrls, item, 'hrefKey', 'href'));
       const label = escapeHtml(String(item?.label || '').trim());
       if (!href || !label) return '';
       return `<a href="${escapeHtml(href)}" class="${linkClass}" rel="noopener noreferrer" target="_blank">${label}</a>`;
@@ -275,6 +290,7 @@ export async function initExperience() {
   }
 
   try {
+    const siteUrls = await getSiteUrls();
     const items = Array.isArray(data.items) ? data.items : [];
     if (!items.length) {
       root.innerHTML = '<p class="text-sm text-stone-500 dark:text-stone-400">No experience entries yet.</p>';
@@ -288,8 +304,8 @@ export async function initExperience() {
         const role = escapeHtml(String(item.role || '').trim());
         const date = escapeHtml(String(item.date || '').trim());
         const description = escapeHtml(String(item.description || '').trim());
-        const linksHtml = renderExperienceLinks(item.links);
-        const mediaHtml = renderExperienceMedia(item.media, i);
+        const linksHtml = renderExperienceLinks(item.links, siteUrls);
+        const mediaHtml = renderExperienceMedia(item.media, i, siteUrls);
         const bullets = Array.isArray(item.bullets) ? item.bullets : [];
         const bulletsHtml = bullets.length
           ? `<ul class="mt-6 space-y-3.5 border-l-2 border-stone-200 pl-5 text-sm leading-relaxed text-stone-600 dark:border-stone-700 dark:text-stone-400">${bullets
@@ -346,6 +362,7 @@ export async function initEducation() {
   }
 
   try {
+    const siteUrls = await getSiteUrls();
     const items = (data.items || []).slice();
     if (!items.length) {
       root.innerHTML = '<p class="text-sm text-stone-500 dark:text-stone-400">No education entries yet.</p>';
@@ -362,7 +379,7 @@ export async function initEducation() {
         const degree = escapeHtml(item.degree || '');
         const dates = escapeHtml(item.dates || '');
         const desc = escapeHtml(String(item.description || '').trim());
-        const progHref = item.programUrl ? safeHttpUrl(String(item.programUrl)) : '';
+        const progHref = safeHttpUrl(resolveSiteUrlFromRecord(siteUrls, item, 'programUrlKey', 'programUrl'));
         const progLabel = escapeHtml('Program page →');
         const progA = progHref
           ? `<a href="${escapeHtml(progHref)}" class="${EDU_PROG_LINK_CLASS}" rel="noopener noreferrer" target="_blank">${progLabel}</a>`
@@ -428,6 +445,7 @@ export async function initCredentials() {
   }
 
   try {
+    const siteUrls = await getSiteUrls();
     const items = (data.items || []).slice();
     if (!items.length) {
       root.innerHTML = '<p class="text-sm text-stone-500 dark:text-stone-400">No credentials listed yet.</p>';
@@ -442,8 +460,8 @@ export async function initCredentials() {
         const title = escapeHtml(item.title || '');
         const meta = escapeHtml(item.meta || '');
         const desc = escapeHtml(String(item.description || '').trim());
-        const certHref = item.url ? safeHttpUrl(String(item.url)) : '';
-        const courseHref = item.courseUrl ? safeHttpUrl(String(item.courseUrl)) : '';
+        const certHref = safeHttpUrl(resolveSiteUrlFromRecord(siteUrls, item, 'urlKey', 'url'));
+        const courseHref = safeHttpUrl(resolveSiteUrlFromRecord(siteUrls, item, 'courseUrlKey', 'courseUrl'));
         const courseA = courseHref
           ? `<a href="${escapeHtml(courseHref)}" class="${certLinkClass}" rel="noopener noreferrer" target="_blank">View ${item.isSpecialization ? 'Specialization' : 'Course'} →</a>`
           : '';
@@ -634,9 +652,11 @@ export async function initBlog() {
   }
 }
 
-function linkedInPostUrl(src) {
+function linkedInPostUrl(src, siteUrls) {
   const m = String(src).match(/\/embed\/feed\/update\/(urn:li:[^?&]+)/);
-  return m ? `https://www.linkedin.com/feed/update/${m[1]}` : 'https://www.linkedin.com/in/StavanGandhi30';
+  const feedBase = resolveSiteUrl(siteUrls, 'https://www.linkedin.com/feed/update/');
+  const profile = resolveSiteUrl(siteUrls, 'linkedinProfile');
+  return m && feedBase ? `${feedBase}${m[1]}` : profile;
 }
 
 export async function initLinkedInEmbeds() {
@@ -654,6 +674,7 @@ export async function initLinkedInEmbeds() {
     return;
   }
 
+  const siteUrls = await getSiteUrls();
   const posts = Array.isArray(data.posts) ? data.posts : [];
   if (!posts.length) {
     track.innerHTML = '<p class="text-sm text-stone-500 dark:text-stone-400">No LinkedIn posts yet.</p>';
@@ -663,7 +684,7 @@ export async function initLinkedInEmbeds() {
 
   track.replaceChildren();
   posts.forEach((post, i) => {
-    const src = safeHttpUrl(String(post?.src || ''));
+    const src = safeHttpUrl(resolveSiteUrlFromRecord(siteUrls, post, 'srcKey', 'src'));
     if (!src) return;
     const w = Number(post.width) || 504;
     const h = Number(post.height) || 894;
@@ -672,7 +693,7 @@ export async function initLinkedInEmbeds() {
 
     const a = document.createElement('a');
     a.className = 'linkedin-embed-card';
-    a.href = safeHttpUrl(String(post.href || '')) || linkedInPostUrl(src);
+    a.href = safeHttpUrl(resolveSiteUrlFromRecord(siteUrls, post, 'hrefKey', 'href')) || linkedInPostUrl(src, siteUrls);
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
     a.setAttribute('aria-label', `Open LinkedIn post ${i + 1} in a new tab`);

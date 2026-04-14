@@ -77,7 +77,7 @@
         "slides": [
           {
             "type": "video",
-            "src": "https://firebasestorage.googleapis.com/v0/b/shivgandhi30.firebasestorage.app/o/video%2FHumanoid.mp4?alt=media&token=4d94bb7f-8b06-4a23-b47b-c1c5cf37dcde",
+            "srcKey": "humanoidResearchVideo",
             "loop": true,
             "poster": "images/photos/humanoid_video_preview.png",
             "ariaLabel": "Humanoid and sensing research clip from DePaul lab work.",

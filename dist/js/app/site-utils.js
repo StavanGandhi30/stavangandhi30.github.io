@@ -1,4 +1,6 @@
 export const MAILTO_MAX = 1900;
+const URLS_JSON_PATH = 'data/urls.json';
+let siteUrlsPromise = null;
 
 export function formatPostDate(iso) {
   try {
@@ -55,4 +57,43 @@ export async function loadSiteJson(relPath) {
   const r = await fetch(new URL(relPath, document.baseURI || window.location.href));
   if (!r.ok) throw new Error('fetch failed');
   return r.json();
+}
+
+export async function loadSiteUrls() {
+  if (!siteUrlsPromise) {
+    siteUrlsPromise = loadSiteJson(URLS_JSON_PATH).catch(() => ({}));
+  }
+  return siteUrlsPromise;
+}
+
+export function resolveSiteUrl(urls, key, fallback = '') {
+  if (typeof key !== 'string' || !key.trim()) return String(fallback || '').trim();
+  const value = urls?.[key];
+  if (typeof value !== 'string' || !value.trim()) return String(fallback || '').trim();
+  return value.trim();
+}
+
+export function resolveSiteUrlFromRecord(urls, record, keyField, valueField) {
+  if (!record || typeof record !== 'object') return '';
+  const key = String(record[keyField] || '').trim();
+  const fallback = String(record[valueField] || '').trim();
+  return resolveSiteUrl(urls, key, fallback);
+}
+
+export function applyUrlKeyBindings(urls, root = document) {
+  if (!root?.querySelectorAll) return;
+  const mediaToReload = new Set();
+  root.querySelectorAll('[data-url-key]').forEach((node) => {
+    const key = node.getAttribute('data-url-key');
+    const value = resolveSiteUrl(urls, key);
+    if (!value) return;
+    const explicitAttr = node.getAttribute('data-url-attr');
+    const inferredAttr =
+      node.tagName === 'SOURCE' || node.tagName === 'IMG' || node.tagName === 'IFRAME' ? 'src' : 'href';
+    node.setAttribute(explicitAttr || inferredAttr, value);
+    if (node.tagName === 'SOURCE' && node.parentElement && typeof node.parentElement.load === 'function') {
+      mediaToReload.add(node.parentElement);
+    }
+  });
+  mediaToReload.forEach((mediaEl) => mediaEl.load());
 }

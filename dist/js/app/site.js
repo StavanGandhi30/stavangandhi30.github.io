@@ -1,7 +1,7 @@
 /**
  * Site entry: loads shell (theme/nav), JSON-driven sections, Connect, ambient audio.
  */
-import { MAILTO_MAX } from './site-utils.js';
+import { MAILTO_MAX, applyUrlKeyBindings, loadSiteUrls } from './site-utils.js';
 import {
   initTheme,
   initSectionNav,
@@ -201,6 +201,8 @@ function hideBootLoader() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
+    const siteUrls = await loadSiteUrls();
+    applyUrlKeyBindings(siteUrls);
     initTheme();
     initSectionNav();
     await initExperience();
