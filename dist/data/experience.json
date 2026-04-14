@@ -79,7 +79,7 @@
             "type": "video",
             "srcKey": "humanoidResearchVideo",
             "loop": true,
-            "poster": "images/photos/humanoid_video_preview.png",
+            "poster": "images/photos/humanoid_video_preview.jpeg",
             "ariaLabel": "Humanoid and sensing research clip from DePaul lab work.",
             "caption": "Humanoid & sensing — clip from lab integration work · DePaul · 2024-2025"
           }

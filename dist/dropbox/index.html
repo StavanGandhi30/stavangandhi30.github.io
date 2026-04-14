@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dropbox | Stavan Gandhi</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --app-bg: #fafaf9;
+        --surface: #ffffff;
+        --surface-muted: #f5f5f4;
+        --line: #e7e5e4;
+        --line-strong: #d6d3d1;
+        --text: #44403c;
+        --text-strong: #1c1917;
+        --muted: #78716c;
+        --accent: #1c1917;
+        --danger: #b91c1c;
+        --rail: #f5f5f4;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --app-bg: #0a0a0a;
+          --surface: #18181b;
+          --surface-muted: #111113;
+          --line: #27272a;
+          --line-strong: #3f3f46;
+          --text: #d6d3d1;
+          --text-strong: #f5f5f4;
+          --muted: #a8a29e;
+          --accent: #f5f5f4;
+          --danger: #fca5a5;
+          --rail: #141417;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        background: var(--app-bg);
+        color: var(--text);
+        font-size: 15px;
+        line-height: 1.625;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .app-shell {
+        min-height: 100vh;
+        display: grid;
+        --sidebar-w: 250px;
+        grid-template-columns: var(--sidebar-w) 10px minmax(0, 1fr);
+      }
+
+      .left-rail {
+        border-right: 1px solid var(--line);
+        background: var(--rail);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 12px 8px;
+        gap: 10px;
+      }
+      .rail-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+      }
+      .rail-gap {
+        flex: 1;
+      }
+
+      .sidebar {
+        border-right: 1px solid var(--line);
+        background: var(--surface-muted);
+        padding: 14px 12px;
+        display: flex;
+        flex-direction: column;
+      }
+      .sidebar-resizer {
+        border: 0;
+        border-left: 1px solid var(--line);
+        border-right: 1px solid transparent;
+        background: transparent;
+        cursor: col-resize;
+        padding: 0;
+        margin: 0;
+      }
+      .sidebar-resizer::before {
+        content: '';
+        display: block;
+        width: 2px;
+        height: 38px;
+        margin: auto;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--line-strong) 75%, transparent);
+      }
+      .sidebar-resizer:hover::before {
+        background: color-mix(in srgb, var(--accent) 38%, var(--line-strong));
+      }
+      .sidebar-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px;
+        min-height: 32px;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--line);
+      }
+      .sidebar-title {
+        margin: 0 0 0 10px;
+        display: flex;
+        align-items: center;
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        white-space: nowrap;
+        line-height: 1;
+      }
+      .sidebar-add-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 1rem;
+        flex: 0 0 28px;
+        line-height: 1;
+        place-self: center end;
+      }
+      .sidebar-add-glyph {
+        display: inline-block;
+        transform: translateY(-2px);
+      }
+      .folder-btn {
+        width: 100%;
+        border-radius: 8px;
+        border: 0px solid var(--line-strong);
+        background: transparent;
+        color: var(--text);
+        text-align: left;
+        padding: 8px 10px;
+        cursor: pointer;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .folder-item .folder-btn {
+        margin-top: 0;
+      }
+      .folder-item--ancestor .folder-btn {
+        font-weight: 500;
+      }
+      .tree-prefix {
+        margin-left: var(--tree-indent, 0px);
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+        font-size: 0.8rem;
+        line-height: 1;
+      }
+      .tree-icon {
+        width: 1em;
+        text-align: center;
+      }
+      .tree-label {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .folder-btn.active {
+        background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+        border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+      }
+      .folder-list {
+        margin: 8px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+      .quick-note {
+        margin: 12px 2px 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .main {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+      .chip-btn {
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 8px 10px;
+        font: inherit;
+        cursor: pointer;
+      }
+      .chip-btn.primary {
+        background: var(--accent);
+        color: var(--app-bg);
+        border-color: var(--accent);
+      }
+      .search-wrap {
+        flex: 1;
+        min-width: 160px;
+      }
+      #search-input {
+        box-sizing: border-box;
+        width: 100%;
+        height: 38px;
+        padding: 8px 10px;
+      }
+      #type-filter {
+        box-sizing: border-box;
+        height: 38px;
+        min-width: 140px;
+        padding: 4px 34px 6px 16px;
+        border-radius: 10px;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      input,
+      select,
+      button {
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 8px 10px;
+        font: inherit;
+      }
+      input:focus,
+      select:focus,
+      button:focus-visible {
+        outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+        outline-offset: 1px;
+      }
+
+      .workspace {
+        padding: 16px;
+      }
+      .workspace-inner {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        padding: 14px;
+      }
+
+      .top-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      #breadcrumbs {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        min-height: 36px;
+        color: var(--muted);
+      }
+      .crumb {
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        padding: 0;
+        cursor: pointer;
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+      .crumb-sep {
+        color: var(--muted);
+      }
+
+      .controls-inline {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .action-row {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .left-actions,
+      .right-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      #folder-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .file-pick-btn {
+        cursor: pointer;
+      }
+      .upload-pick {
+        position: relative;
+      }
+      .upload-pick-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        left: auto;
+        z-index: 120;
+        min-width: 170px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+        padding: 6px;
+        display: grid;
+        gap: 4px;
+      }
+      .upload-pick-menu[hidden] {
+        display: none;
+      }
+      .upload-pick-item {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        text-align: left;
+        border-radius: 8px;
+        padding: 7px 8px;
+        cursor: pointer;
+      }
+      .upload-pick-item:hover {
+        background: var(--surface-muted);
+      }
+
+      .icon-btn {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .icon-btn[hidden] {
+        display: none !important;
+      }
+      .icon-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+      .icon-btn.danger {
+        color: var(--danger);
+        border-color: color-mix(in srgb, var(--danger) 45%, var(--line-strong));
+        background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+      }
+      #pending-modal[hidden] {
+        display: none;
+      }
+      #pending-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.56);
+      }
+      #loading-overlay[hidden] {
+        display: none;
+      }
+      #loading-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1200;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.5);
+      }
+      #text-input-modal[hidden] {
+        display: none;
+      }
+      #text-input-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1210;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.56);
+      }
+      .text-input-modal-card {
+        width: min(480px, 100%);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+      }
+      .text-input-modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .text-input-modal-title {
+        margin: 0;
+        font-size: 0.9rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .text-input-modal-body {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+      }
+      .text-input-modal-hint {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+      #text-input-field {
+        width: 100%;
+        height: 40px;
+      }
+      .text-input-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      .text-input-btn {
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 7px 12px;
+        cursor: pointer;
+      }
+      .text-input-btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--app-bg);
+      }
+      #confirm-modal[hidden] {
+        display: none;
+      }
+      #confirm-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1220;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.56);
+      }
+      .confirm-modal-card {
+        width: min(440px, 100%);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+      }
+      .confirm-modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .confirm-modal-title {
+        margin: 0;
+        font-size: 0.9rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .confirm-modal-body {
+        display: grid;
+        gap: 14px;
+        padding: 14px;
+      }
+      .confirm-modal-message {
+        margin: 0;
+        color: var(--text);
+        font-size: 0.92rem;
+        line-height: 1.5;
+      }
+      .confirm-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .confirm-modal-ok--danger {
+        background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+        border-color: color-mix(in srgb, var(--danger) 45%, var(--line-strong));
+        color: var(--danger);
+      }
+      .confirm-modal-ok--danger:hover {
+        background: color-mix(in srgb, var(--danger) 16%, var(--surface));
+      }
+      .loading-overlay-card {
+        width: min(360px, 100%);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        padding: 28px 16px 18px;
+        display: grid;
+        justify-items: center;
+        gap: 10px;
+      }
+      .loading-spinner {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        border: 2px solid color-mix(in srgb, var(--text) 16%, transparent);
+        border-top-color: var(--accent);
+        animation: spin 0.9s linear infinite;
+      }
+      .loading-label {
+        color: var(--text);
+        font-size: 0.92rem;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .pending-modal-card {
+        width: min(680px, 100%);
+        max-height: 84vh;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+      }
+      .pending-modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .pending-modal-title {
+        margin: 0;
+        font-size: 0.9rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .pending-modal-body {
+        padding: 12px 14px;
+        overflow: auto;
+      }
+      .pending-modal-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 12px 14px;
+        border-top: 1px solid var(--line);
+      }
+      .pending-action-btn {
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 7px 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+      }
+      .pending-action-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+      .pending-action-btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--app-bg);
+      }
+      .pending-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 6px;
+      }
+      .pending-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        padding: 8px 10px;
+      }
+      .pending-item__name {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        min-width: 0;
+      }
+      .pending-item__label {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .pending-item__meta {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      #selection-bar {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        display: none;
+      }
+      .status {
+        margin-top: 30px;
+        min-height: 1.2em;
+        color: #1a8d53;
+        font-size: 0.9rem;
+        display: none;
+      }
+      #selection-bar.is-visible {
+        display: block;
+      }
+      .status.is-visible {
+        display: block;
+      }
+      .status.error {
+        color: var(--danger);
+      }
+      .sync-indicator {
+        margin-top: 30px;
+        min-height: 1.2em;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+      .sync-indicator.is-hidden {
+        display: none;
+      }
+
+      .dropzone {
+        margin-top: 10px;
+        border: 1px dashed var(--line-strong);
+        border-radius: 12px;
+        padding: 28px 12px;
+        text-align: center;
+        color: var(--muted);
+        background: var(--surface-muted);
+      }
+      .dropzone.drag-over {
+        border-color: var(--accent);
+        color: var(--text);
+      }
+
+      .table {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: visible;
+        position: relative;
+      }
+      .table-head,
+      .file-row {
+        display: grid;
+        grid-template-columns: 40px minmax(220px, 2.2fr) minmax(108px, 0.75fr) 175px 90px 120px;
+        align-items: center;
+        gap: 8px;
+      }
+      .table-head {
+        padding: 10px 12px;
+        background: var(--surface-muted);
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .head-sort {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .head-sort-btn {
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        padding: 0;
+        border-radius: 5px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1;
+      }
+      .head-sort-btn.active {
+        border-color: var(--line);
+        color: var(--text);
+        background: var(--surface);
+      }
+      .head-sort-btn:hover {
+        color: var(--text);
+      }
+      #file-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .file-row {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      .file-row:last-child {
+        border-bottom: 0;
+      }
+      .file-row:hover {
+        background: color-mix(in srgb, var(--accent) 6%, transparent);
+      }
+      .cell-check {
+        display: flex;
+        justify-content: center;
+      }
+      .file-name {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        min-width: 0;
+      }
+      .file-name-main {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+      .icon {
+        width: 1.1em;
+      }
+      .file-link {
+        color: var(--text);
+        text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .file-link:hover {
+        text-decoration: underline;
+      }
+      .file-meta {
+        color: var(--muted);
+        font-size: 0.84rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .row-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .tag-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--surface-muted);
+        color: var(--muted);
+        font-size: 0.74rem;
+        line-height: 1.45;
+      }
+      .row-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        position: relative;
+        z-index: 10;
+      }
+      .row-actions.menu-open {
+        z-index: 70;
+      }
+      .row-menu-btn {
+        position: relative;
+        z-index: 1;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border-radius: 8px;
+        line-height: 1;
+      }
+      .row-menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        right: 0;
+        z-index: 50;
+        min-width: 132px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+        padding: 6px;
+        display: grid;
+        gap: 4px;
+      }
+      .row-menu[hidden] {
+        display: none;
+      }
+      .row-menu-item {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        text-align: left;
+        border-radius: 8px;
+        padding: 7px 8px;
+        cursor: pointer;
+      }
+      .row-menu-item:hover {
+        background: var(--surface-muted);
+      }
+      .row-menu-item.danger {
+        color: var(--danger);
+      }
+      .empty {
+        padding: 14px 12px;
+        color: var(--muted);
+        font-style: italic;
+      }
+      .empty.empty-dropzone {
+        margin: 10px;
+        border: 1px dashed var(--line-strong);
+        border-radius: 12px;
+        padding: 28px 12px;
+        text-align: center;
+        background: var(--surface-muted);
+        font-style: normal;
+      }
+      .empty-dropzone__hint {
+        margin-top: 6px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      #file-list.drag-over .empty.empty-dropzone {
+        border-color: var(--accent);
+        color: var(--text);
+      }
+
+      .footer-actions {
+        margin-top: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
+        padding: 0 10px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+      }
+      .sidebar .footer-actions {
+        margin-top: auto;
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .footer-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 30px;
+        gap: 6px;
+        padding: 2px 8px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.84rem;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        transition: color 0.15s ease;
+      }
+      .footer-link:hover {
+        color: var(--text);
+      }
+      .footer-link svg {
+        width: 14px;
+        height: 14px;
+      }
+      .footer-link-btn {
+        margin: 0;
+        line-height: 1;
+        cursor: pointer;
+        background: transparent;
+      }
+      .footer-copy {
+        color: color-mix(in srgb, var(--muted) 90%, transparent);
+        font-size: 0.82rem;
+        letter-spacing: 0.02em;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      #preview-modal[hidden] {
+        display: none;
+      }
+      #preview-modal {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.72);
+        z-index: 1000;
+      }
+      .preview-card {
+        width: min(920px, 100%);
+        max-height: 90vh;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .preview-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .preview-content {
+        min-height: 260px;
+        max-height: calc(90vh - 84px);
+        overflow: auto;
+        display: grid;
+        place-items: center;
+      }
+      .preview-content img,
+      .preview-content video,
+      .preview-content audio,
+      .preview-content iframe {
+        max-width: 100%;
+      }
+
+      @media (max-width: 1060px) {
+        .app-shell {
+          grid-template-columns: 220px 10px minmax(0, 1fr);
+        }
+      }
+
+      @media (max-width: 820px) {
+        .app-shell {
+          grid-template-columns: 1fr;
+        }
+        .sidebar-resizer {
+          display: none;
+        }
+        .sidebar {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+        .quick-note {
+          display: none;
+        }
+        .topbar {
+          flex-wrap: wrap;
+        }
+        .search-wrap {
+          order: 3;
+          width: 100%;
+        }
+        .workspace {
+          padding: 12px;
+        }
+        .top-controls,
+        .action-row {
+          align-items: stretch;
+        }
+        .controls-inline,
+        .left-actions,
+        .right-actions {
+          width: 100%;
+        }
+        .controls-inline select,
+        .controls-inline input {
+          flex: 1 1 auto;
+        }
+        .table-head {
+          display: none;
+        }
+        .file-row {
+          grid-template-columns: 34px 1fr;
+          gap: 8px;
+        }
+        .cell-path,
+        .cell-date,
+        .cell-size,
+        .row-actions {
+          grid-column: 2;
+        }
+        .row-actions {
+          justify-content: flex-start;
+          flex-wrap: wrap;
+        }
+        .row-menu {
+          right: auto;
+          left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar-head">
+          <p class="sidebar-title">Dropbox</p>
+          <button id="sidebar-new-folder-btn" class="sidebar-add-btn" type="button" title="New folder" aria-label="Create new folder">
+            <span class="sidebar-add-glyph" aria-hidden="true">+</span>
+          </button>
+        </div>
+        <button id="folder-home-btn" class="folder-btn active" type="button">Home</button>
+        <ul id="folder-list" class="folder-list"></ul>
+        <p class="quick-note">Create folders and keep this space organized like a file manager.</p>
+        <div class="footer-actions">
+          <a class="footer-link" href="/" aria-label="Back to home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+              <path d="M3 11.5 12 4l9 7.5" />
+              <path d="M7 10.5V20h10v-9.5" />
+            </svg>
+            <span>Home</span>
+          </a>
+          <button id="signout-btn" class="footer-link footer-link-btn" type="button" aria-label="Sign out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+              <path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4" />
+              <path d="M14 16l4-4-4-4" />
+              <path d="M9 12h9" />
+            </svg>
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </aside>
+      <button
+        id="sidebar-resizer"
+        class="sidebar-resizer"
+        type="button"
+        aria-label="Resize sidebar"
+        title="Drag to resize sidebar"
+      ></button>
+
+      <section class="main">
+        <header class="topbar">
+          <div class="search-wrap">
+            <input id="search-input" type="search" placeholder="Search files and folders..." />
+          </div>
+          <select id="type-filter" aria-label="Filter by type">
+            <option value="all">All</option>
+          </select>
+        </header>
+
+        <div class="workspace">
+          <div class="workspace-inner">
+            <div class="top-controls">
+              <div id="breadcrumbs"></div>
+              <div class="action-row">
+                <div class="left-actions">
+                  <input id="folder-input" type="file" multiple webkitdirectory directory />
+                  <div class="upload-pick">
+                    <button id="file-pick-btn" class="icon-btn file-pick-btn" type="button" title="Choose folder to upload" aria-label="Choose folder to upload">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l1.8 2H18.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z" />
+                        <path d="M12 10v5M9.5 12.5h5" />
+                      </svg>
+                      <span class="sr-only">Choose folder to upload</span>
+                    </button>
+                  </div>
+                  <button id="refresh-btn" class="icon-btn" type="button" aria-label="Refresh list" title="Refresh list">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                      <path d="M20 12a8 8 0 1 1-2.34-5.66" />
+                      <path d="M20 4v6h-6" />
+                    </svg>
+                    <span class="sr-only">Refresh</span>
+                  </button>
+                </div>
+                <div class="right-actions">
+                  <button id="delete-selected-btn" class="icon-btn danger" type="button" aria-label="Delete selected items" title="Delete selected items" disabled hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4h8v2" />
+                      <path d="M19 6l-1 14H6L5 6" />
+                      <path d="M10 11v6M14 11v6" />
+                    </svg>
+                    <span class="sr-only">Delete Selected</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="selection-bar" aria-live="polite"></div>
+            <div id="dropbox-status" class="status" aria-live="polite"></div>
+            <div id="sync-indicator" class="sync-indicator" aria-live="polite"></div>
+
+            <div class="table">
+              <div class="table-head">
+                <span class="cell-check"></span>
+                <span class="head-sort">
+                  <span>Item</span>
+                  <button class="head-sort-btn" type="button" data-sort-field="name" aria-label="Sort item" title="Sort item">▼</button>
+                </span>
+                <span class="head-sort">
+                  <span>Type</span>
+                  <button class="head-sort-btn" type="button" data-sort-field="type" aria-label="Sort type" title="Sort type">▼</button>
+                </span>
+                <span class="head-sort">
+                  <span>Updated</span>
+                  <button class="head-sort-btn" type="button" data-sort-field="date" aria-label="Sort updated" title="Sort updated">▼</button>
+                </span>
+                <span class="head-sort">
+                  <span>Size</span>
+                  <button class="head-sort-btn" type="button" data-sort-field="size" aria-label="Sort size" title="Sort size">▼</button>
+                </span>
+                <span style="text-align:right;">Actions</span>
+              </div>
+              <ul id="file-list"></ul>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <div id="preview-modal" hidden>
+      <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="preview-title">
+        <div class="preview-head">
+          <strong id="preview-title">Preview</strong>
+          <button id="preview-close-btn" type="button">Close</button>
+        </div>
+        <div id="preview-content" class="preview-content"></div>
+      </div>
+    </div>
+
+    <div id="pending-modal" hidden>
+      <div class="pending-modal-card" role="dialog" aria-modal="true" aria-labelledby="pending-modal-title">
+        <div class="pending-modal-head">
+          <p id="pending-modal-title" class="pending-modal-title">Selected files</p>
+          <button id="pending-close-btn" class="icon-btn" type="button" aria-label="Close selected files overlay" title="Close selected files overlay">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+            <span class="sr-only">Close</span>
+          </button>
+        </div>
+        <div class="pending-modal-body">
+          <ul id="pending-file-list" class="pending-list"></ul>
+        </div>
+        <div class="pending-modal-actions">
+          <label for="folder-input" class="pending-action-btn" title="Add folder" aria-label="Add folder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M3.5 7.5A2.5 2.5 0 0 1 6 5h4l1.8 2H18a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 18 19H6a2.5 2.5 0 0 1-2.5-2.5z" />
+              <path d="M12 9v6M9 12h6" />
+            </svg>
+            <span>Add File(s)</span>
+          </label>
+          <button id="pending-clear-btn" class="pending-action-btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+            <span>Clear</span>
+          </button>
+          <button id="pending-upload-btn" class="pending-action-btn primary" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M12 16V4M12 4l-4 4m4-4 4 4" />
+              <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+            </svg>
+            <span>Upload</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="loading-overlay" hidden>
+      <div class="loading-overlay-card" role="status" aria-live="polite" aria-atomic="true">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <p id="loading-label" class="loading-label">Loading...</p>
+      </div>
+    </div>
+
+    <div id="text-input-modal" hidden>
+      <form id="text-input-form" class="text-input-modal-card" role="dialog" aria-modal="true" aria-labelledby="text-input-title">
+        <div class="text-input-modal-head">
+          <p id="text-input-title" class="text-input-modal-title">Input</p>
+          <button id="text-input-close-btn" class="icon-btn" type="button" aria-label="Close input dialog" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+            <span class="sr-only">Close</span>
+          </button>
+        </div>
+        <div class="text-input-modal-body">
+          <p id="text-input-hint" class="text-input-modal-hint"></p>
+          <input id="text-input-field" type="text" />
+          <div class="text-input-modal-actions">
+            <button id="text-input-cancel-btn" class="text-input-btn" type="button">Cancel</button>
+            <button id="text-input-submit-btn" class="text-input-btn primary" type="submit">Save</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div id="confirm-modal" hidden>
+      <div class="confirm-modal-card" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+        <div class="confirm-modal-head">
+          <p id="confirm-modal-title" class="confirm-modal-title">Confirm</p>
+          <button id="confirm-modal-close-btn" class="icon-btn" type="button" aria-label="Close" title="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+            <span class="sr-only">Close</span>
+          </button>
+        </div>
+        <div class="confirm-modal-body">
+          <p id="confirm-modal-message" class="confirm-modal-message"></p>
+          <div class="confirm-modal-actions">
+            <button id="confirm-modal-cancel-btn" class="text-input-btn" type="button">Cancel</button>
+            <button id="confirm-modal-ok-btn" class="text-input-btn primary" type="button">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/vendor/jszip.min.js?v=20260414b"></script>
+    <script type="module" src="/js/firebase/dropbox-page.js?v=20260414b"></script>
+  </body>
+</html>

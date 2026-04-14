@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | Stavan Gandhi</title>
+    <style>
+      :root {
+        --app-bg: #fafaf9;
+        --surface: #ffffff;
+        --line: #e7e5e4;
+        --line-strong: #d6d3d1;
+        --text: #44403c;
+        --text-strong: #1c1917;
+        --muted: #78716c;
+        --accent: #1c1917;
+        --danger: #b91c1c;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --app-bg: #0a0a0a;
+          --surface: #18181b;
+          --line: #27272a;
+          --line-strong: #3f3f46;
+          --text: #d6d3d1;
+          --text-strong: #f5f5f4;
+          --muted: #a8a29e;
+          --accent: #f5f5f4;
+          --danger: #fca5a5;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        font-size: 15px;
+        line-height: 1.625;
+        -webkit-font-smoothing: antialiased;
+        background: var(--app-bg);
+        color: var(--text);
+      }
+      .shell {
+        min-height: 100svh;
+        display: grid;
+        place-items: center;
+        padding: 22px;
+      }
+      main {
+        width: min(460px, 100%);
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: var(--text-strong);
+      }
+      p {
+        color: var(--muted);
+        margin: 0 0 12px;
+      }
+      #email-auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      #email-auth-form label {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 0;
+        font-size: 0.9rem;
+      }
+      input,
+      button {
+        width: 100%;
+        margin: 0;
+        border-radius: 10px;
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+        color: var(--text);
+        padding: 10px 12px;
+        font: inherit;
+      }
+      input:focus,
+      button:focus-visible {
+        outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+        outline-offset: 1px;
+      }
+      button {
+        cursor: pointer;
+      }
+      .primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #ffffff;
+        font-weight: 600;
+      }
+      @media (prefers-color-scheme: dark) {
+        .primary {
+          color: #0a0a0a;
+        }
+      }
+      .status {
+        min-height: 1.2em;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #1a8d53;
+      }
+      .status.error {
+        color: var(--danger);
+      }
+      .footer-actions {
+        margin-top: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .footer-link {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .footer-link:hover {
+        color: var(--text);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <main>
+        <h1>Login</h1>
+        <p>Sign in to access your private Dropbox page.</p>
+
+        <form id="email-auth-form">
+          <label>
+            Email
+            <input id="email" type="email" autocomplete="email" required />
+          </label>
+          <label>
+            Password
+            <input id="password" type="password" autocomplete="current-password" minlength="6" required />
+          </label>
+          <button id="email-submit" class="primary" type="submit">Sign In</button>
+        </form>
+        <div id="auth-status" class="status" aria-live="polite"></div>
+
+        <div class="footer-actions">
+          <a class="footer-link" href="/">Back to home</a>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="/js/firebase/login-page.js"></script>
+  </body>
+</html>
