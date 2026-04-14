@@ -46,7 +46,7 @@ function expPosterLoopAttrs(m) {
 function renderExpVideoFigure(figureClass, ariaEscaped, srcEscaped, attrs, captionEscaped, videoClass = EXP_VIDEO_CLASS) {
   const { posterAttr, loopAttr } = attrs;
   return `<figure class="${figureClass}">
-      <video class="${videoClass}" controls playsinline preload="metadata"${loopAttr} aria-label="${ariaEscaped}"${posterAttr}>
+      <video class="${videoClass}" controls playsinline preload="none"${loopAttr} aria-label="${ariaEscaped}"${posterAttr}>
         <source src="${srcEscaped}" type="video/mp4" />
       </video>
       ${expFigcaptionEsc(captionEscaped)}

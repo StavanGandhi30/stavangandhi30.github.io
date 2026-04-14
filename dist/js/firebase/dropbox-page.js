@@ -3,7 +3,6 @@ import {
   deleteObject,
   getBlob,
   getBytes,
-  getDownloadURL,
   getMetadata,
   listAll,
   ref,
@@ -11,7 +10,9 @@ import {
   uploadBytes,
   uploadBytesResumable,
 } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-storage.js';
-import { auth, storage } from './client.js';
+import { auth, getCachedDownloadURL, invalidateStorageDownloadUrlCache, storage } from './client.js';
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const statusEl = document.getElementById('dropbox-status');
 const folderInputEl = document.getElementById('folder-input');
@@ -112,8 +113,9 @@ function renderPendingFilesPreview() {
     const left = document.createElement('div');
     left.className = 'pending-item__name';
     const icon = document.createElement('span');
+    icon.className = 'pending-item__icon';
     icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = fileIcon('file', file.name);
+    icon.appendChild(createFileTypeIconEl('file', file.name));
     const label = document.createElement('span');
     label.className = 'pending-item__label';
     label.textContent = file.name;
@@ -340,6 +342,11 @@ function cloneRows(rows) {
   }));
 }
 
+/** Persisted folder cache must not store download URLs (tokens, size); URLs are resolved lazily when needed. */
+function rowsForFolderCachePersist(rows) {
+  return cloneRows(rows || []).map((row) => (row.kind === 'file' ? { ...row, url: '' } : row));
+}
+
 function folderCacheStorageKey(uid) {
   return `${FOLDER_CACHE_STORAGE_PREFIX}:${uid}`;
 }
@@ -362,7 +369,7 @@ function persistFolderCache() {
     folderCache.forEach((entry, key) => {
       payload[key] = {
         fetchedAt: Number(entry.fetchedAt || Date.now()),
-        rows: cloneRows(entry.rows || []),
+        rows: rowsForFolderCachePersist(entry.rows || []),
       };
     });
     localStorage.setItem(folderCacheStorageKey(activeCacheUid), JSON.stringify(payload));
@@ -395,6 +402,7 @@ function hydrateFolderCache(uid) {
 function clearFolderCache(path = null) {
   if (!activeCacheUid) return;
   if (path == null) {
+    invalidateStorageDownloadUrlCache();
     folderCache.clear();
     try {
       localStorage.removeItem(folderCacheStorageKey(activeCacheUid));
@@ -713,15 +721,73 @@ function fileDateLabel(timeCreated) {
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleString();
 }
 
-function fileIcon(kind, name = '') {
-  if (kind === 'folder') return '📁';
-  const n = name.toLowerCase();
-  if (/\.(png|jpe?g|gif|webp|svg)$/.test(n)) return '🖼️';
-  if (/\.(mp4|mov|webm|m4v)$/.test(n)) return '🎬';
-  if (/\.(mp3|wav|m4a|aac|flac)$/.test(n)) return '🎵';
-  if (/\.pdf$/.test(n)) return '📄';
-  if (/\.(zip|rar|7z|tar|gz)$/.test(n)) return '🗜️';
-  return '📦';
+function createFileTypeSvgRoot() {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '1.5');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.classList.add('file-type-icon');
+  return svg;
+}
+
+function svgAppend(svg, tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  Object.entries(attrs).forEach(([key, value]) => {
+    if (value != null && value !== '') el.setAttribute(key, String(value));
+  });
+  svg.appendChild(el);
+  return el;
+}
+
+function createFileTypeIconEl(kind, name = '') {
+  const svg = createFileTypeSvgRoot();
+  if (kind === 'folder') {
+    svgAppend(svg, 'path', {
+      d: 'M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z',
+    });
+    return svg;
+  }
+  const n = String(name || '').toLowerCase();
+  if (/\.(png|jpe?g|gif|webp|svg)$/.test(n)) {
+    svgAppend(svg, 'rect', { width: '18', height: '18', x: '3', y: '3', rx: '2', ry: '2' });
+    svgAppend(svg, 'circle', { cx: '9', cy: '9', r: '2' });
+    svgAppend(svg, 'path', { d: 'm21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21' });
+    return svg;
+  }
+  if (/\.(mp4|mov|webm|m4v)$/.test(n)) {
+    svgAppend(svg, 'path', {
+      d: 'm16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5',
+    });
+    svgAppend(svg, 'rect', { x: '2', y: '6', width: '14', height: '12', rx: '2' });
+    return svg;
+  }
+  if (/\.(mp3|wav|m4a|aac|flac)$/.test(n)) {
+    svgAppend(svg, 'path', { d: 'M9 18V5l12-2v13' });
+    svgAppend(svg, 'circle', { cx: '6', cy: '18', r: '3' });
+    svgAppend(svg, 'circle', { cx: '18', cy: '16', r: '3' });
+    return svg;
+  }
+  if (/\.pdf$/.test(n)) {
+    svgAppend(svg, 'path', { d: 'M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z' });
+    svgAppend(svg, 'path', { d: 'M14 2v4a2 2 0 0 0 2 2h4' });
+    svgAppend(svg, 'path', { d: 'M10 9H8' });
+    svgAppend(svg, 'path', { d: 'M16 13H8' });
+    svgAppend(svg, 'path', { d: 'M16 17H8' });
+    return svg;
+  }
+  if (/\.(zip|rar|7z|tar|gz)$/.test(n)) {
+    svgAppend(svg, 'rect', { width: '20', height: '5', x: '2', y: '3', rx: '1' });
+    svgAppend(svg, 'path', { d: 'M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8' });
+    svgAppend(svg, 'path', { d: 'M10 12h4' });
+    return svg;
+  }
+  svgAppend(svg, 'path', { d: 'M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z' });
+  svgAppend(svg, 'path', { d: 'M14 2v4a2 2 0 0 0 2 2h4' });
+  return svg;
 }
 
 function fileTypeLabel(row) {
@@ -739,6 +805,17 @@ function fileTypeLabel(row) {
 
 function fileTypeKey(row) {
   return fileTypeLabel(row).toLowerCase();
+}
+
+async function ensureFileRowUrl(row) {
+  if (!row || row.kind !== 'file') return '';
+  const existing = String(row.url || '').trim();
+  if (existing) return existing;
+  const path = String(row.fullPath || '').trim();
+  if (!path) throw new Error('Missing file path.');
+  const url = await getCachedDownloadURL(ref(storage, path));
+  row.url = url;
+  return url;
 }
 
 function toTitleCase(value) {
@@ -795,6 +872,12 @@ function buildShortFileLink(row) {
 }
 
 async function copyShortLink(row) {
+  try {
+    await ensureFileRowUrl(row);
+  } catch {
+    setStatus('No short link available for this item.', true);
+    return;
+  }
   const value = buildShortFileLink(row);
   if (!value) {
     setStatus('No short link available for this item.', true);
@@ -833,7 +916,7 @@ async function handleShortDownloadFromQuery() {
   try {
     setStatus('Opening short link...');
     const fullPath = `${rootPrefix(currentUser.uid)}/${relPath}`;
-    const url = await getDownloadURL(ref(storage, fullPath));
+    const url = await getCachedDownloadURL(ref(storage, fullPath));
     triggerBrowserDownload(url, relPath.split('/').pop() || 'download');
     setStatus('Started download from short link.');
   } catch (err) {
@@ -878,7 +961,7 @@ async function downloadBlobWithFetch(url, expectedSize = 0) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 300000);
   try {
-    const response = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+    const response = await fetch(url, { signal: controller.signal, cache: 'default' });
     if (!response.ok) {
       throw new Error(`Could not download file (HTTP ${response.status}).`);
     }
@@ -912,7 +995,7 @@ async function downloadBlobWithFetch(url, expectedSize = 0) {
 async function downloadSourceBlob(fromRef, metadata, onPhase) {
   try {
     if (onPhase) onPhase('download-url');
-    const url = await withTimeout(getDownloadURL(fromRef), 15000, 'Timed out creating source download URL.');
+    const url = await withTimeout(getCachedDownloadURL(fromRef), 15000, 'Timed out creating source download URL.');
     return await downloadBlobWithFetch(url, Number(metadata?.size || 0));
   } catch (urlReadError) {
     try {
@@ -959,48 +1042,24 @@ async function listAllItemsRecursive(folderRef) {
   return all;
 }
 
+/**
+ * Lightweight folder summary: one getMetadata on `.keep` (tags + rough date).
+ * Skips recursive listAll/getMetadata over every nested file (major bandwidth + quota saver).
+ * Folder size stays 0 (UI shows "--"); sort-by-size treats folders as equal.
+ */
 async function resolveFolderStats(folderRef) {
-  const items = await listAllItemsRecursive(folderRef);
-  const visibleItems = items.filter((itemRef) => itemRef.name !== '.keep');
-  const keepPath = `${folderRef.fullPath}/.keep`;
-  const keepItem = items.find((itemRef) => itemRef.fullPath === keepPath);
+  const prefix = String(folderRef?.fullPath || '').replace(/\/+$/, '');
   let tags = [];
-  if (keepItem) {
-    try {
-      const keepMeta = await getMetadata(keepItem);
-      tags = tagsFromMetadata(keepMeta);
-      if (!visibleItems.length) {
-        const keepTime = String(keepMeta.timeCreated || keepMeta.updated || '');
-        return { totalSize: 0, latestTime: keepTime, tags };
-      }
-    } catch {
-      /* ignore */
-    }
-  }
-  if (!visibleItems.length) {
-    return { totalSize: 0, latestTime: '', tags };
-  }
-
-  const metas = await Promise.all(
-    visibleItems.map(async (itemRef) => {
-      try {
-        return await getMetadata(itemRef);
-      } catch {
-        return null;
-      }
-    })
-  );
-
-  let totalSize = 0;
   let latestTime = '';
-  metas.forEach((meta) => {
-    if (!meta) return;
-    totalSize += Number(meta.size || 0);
-    const stamp = String(meta.updated || meta.timeCreated || '');
-    if (stamp && (!latestTime || stamp > latestTime)) latestTime = stamp;
-  });
-
-  return { totalSize, latestTime, tags };
+  if (!prefix) return { totalSize: 0, latestTime, tags };
+  try {
+    const keepMeta = await getMetadata(ref(storage, `${prefix}/.keep`));
+    tags = tagsFromMetadata(keepMeta);
+    latestTime = String(keepMeta.timeCreated || keepMeta.updated || '');
+  } catch {
+    /* no .keep or inaccessible */
+  }
+  return { totalSize: 0, latestTime, tags };
 }
 
 function normalizeUploadRelativePath(rawPath) {
@@ -1078,7 +1137,7 @@ async function downloadFolderAsFiles(row, visibleItems) {
     const itemRef = visibleItems[index];
     const rel = itemRef.fullPath.slice(row.fullPath.length + 1);
     setStatus(`Starting file downloads... ${index + 1}/${visibleItems.length}`);
-    const url = await withTimeout(getDownloadURL(itemRef), 30000, `Timed out resolving "${itemRef.name}".`);
+    const url = await withTimeout(getCachedDownloadURL(itemRef), 30000, `Timed out resolving "${itemRef.name}".`);
     const fallbackName = `${row.name}__${rel.replace(/[\\/]/g, '__')}`;
     triggerBrowserDownload(url, fallbackName);
   }
@@ -1109,7 +1168,7 @@ async function downloadFolder(row) {
       const rel = itemRef.fullPath.slice(row.fullPath.length + 1);
       setStatus(`Preparing "${row.name}" for download... ${index + 1}/${visibleItems.length}`);
       const [url, metadata] = await Promise.all([
-        withTimeout(getDownloadURL(itemRef), 20000, `Timed out resolving URL for "${itemRef.name}".`),
+        withTimeout(getCachedDownloadURL(itemRef), 20000, `Timed out resolving URL for "${itemRef.name}".`),
         withTimeout(getMetadata(itemRef), 30000, `Timed out reading metadata for "${itemRef.name}".`),
       ]);
       const blob = await withTimeout(
@@ -1237,6 +1296,7 @@ async function renameRow(row) {
       }
       setStatus(`Renamed folder to "${nextName}".`);
     }
+    invalidateStorageDownloadUrlCache();
     await refreshFileList({ forceLive: true });
   } catch (err) {
     const detail = err?.message || err?.code || 'Rename failed.';
@@ -1262,26 +1322,38 @@ function closePreview() {
   previewContent.replaceChildren();
 }
 
-function showPreview(row) {
-  if (!row?.url) return;
+async function showPreview(row) {
+  if (!row || row.kind !== 'file') return;
+  try {
+    await ensureFileRowUrl(row);
+  } catch (err) {
+    setStatus(err?.message || 'Could not load preview.', true);
+    return;
+  }
+  if (!row.url) return;
   previewTitle.textContent = row.name;
   previewContent.replaceChildren();
   const lower = row.name.toLowerCase();
   let el;
   if (/\.(png|jpe?g|gif|webp|svg)$/.test(lower)) {
     el = document.createElement('img');
+    el.loading = 'lazy';
+    el.decoding = 'async';
     el.src = row.url;
     el.alt = row.name;
   } else if (/\.(mp4|mov|webm|m4v)$/.test(lower)) {
     el = document.createElement('video');
+    el.preload = 'none';
     el.src = row.url;
     el.controls = true;
   } else if (/\.(mp3|wav|m4a|aac|flac)$/.test(lower)) {
     el = document.createElement('audio');
+    el.preload = 'none';
     el.src = row.url;
     el.controls = true;
   } else if (/\.pdf$/.test(lower)) {
     el = document.createElement('iframe');
+    el.loading = 'lazy';
     el.src = row.url;
     el.width = '100%';
     el.height = '700';
@@ -1378,7 +1450,7 @@ function renderFolderSidebar(rows) {
     const icon = document.createElement('span');
     icon.className = 'tree-icon';
     icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = '📁';
+    icon.appendChild(createFileTypeIconEl('folder', ''));
 
     const label = document.createElement('span');
     label.className = 'tree-label';
@@ -1537,7 +1609,7 @@ function renderRows(rows) {
     titleLine.className = 'file-name-main';
     const icon = document.createElement('span');
     icon.className = 'icon';
-    icon.textContent = fileIcon(row.kind, row.name);
+    icon.appendChild(createFileTypeIconEl(row.kind, row.name));
     titleLine.appendChild(icon);
 
     if (row.kind === 'folder') {
@@ -1554,10 +1626,25 @@ function renderRows(rows) {
     } else {
       const a = document.createElement('a');
       a.className = 'file-link';
-      a.href = row.url;
-      a.target = '_blank';
       a.rel = 'noopener noreferrer';
+      a.target = '_blank';
       a.textContent = row.name;
+      const urlReady = String(row.url || '').trim();
+      if (urlReady) {
+        a.href = urlReady;
+      } else {
+        a.href = '#';
+        a.addEventListener('click', async (e) => {
+          e.preventDefault();
+          try {
+            const u = await ensureFileRowUrl(row);
+            if (!u) return;
+            window.open(u, '_blank', 'noopener,noreferrer');
+          } catch (err) {
+            setStatus(err?.message || 'Could not open file.', true);
+          }
+        });
+      }
       titleLine.appendChild(a);
     }
     nameWrap.appendChild(titleLine);
@@ -1700,15 +1787,16 @@ function renderRows(rows) {
       downloadItem.type = 'button';
       downloadItem.className = 'row-menu-item';
       downloadItem.textContent = 'Download';
-      downloadItem.addEventListener('click', () => {
+      downloadItem.addEventListener('click', async () => {
         menu.hidden = true;
         menuBtn.setAttribute('aria-expanded', 'false');
-        if (!row.url) {
-          setStatus('Download failed: Missing file URL.', true);
-          return;
+        try {
+          const u = await ensureFileRowUrl(row);
+          triggerBrowserDownload(u, row.name);
+          setStatus(`Started download for "${row.name}".`);
+        } catch (err) {
+          setStatus(err?.message || 'Download failed.', true);
         }
-        triggerBrowserDownload(row.url, row.name);
-        setStatus(`Started download for "${row.name}".`);
       });
 
       const previewItem = document.createElement('button');
@@ -1718,7 +1806,7 @@ function renderRows(rows) {
       previewItem.addEventListener('click', () => {
         menu.hidden = true;
         menuBtn.setAttribute('aria-expanded', 'false');
-        showPreview(row);
+        void showPreview(row);
       });
 
       const deleteItem = document.createElement('button');
@@ -1884,8 +1972,8 @@ async function refreshFileList({ forceLive = false } = {}) {
     const listing = await listAll(ref(storage, folderPath));
     const files = await Promise.all(
       listing.items.map(async (itemRef) => {
-        const [metadata, url] = await Promise.all([getMetadata(itemRef), getDownloadURL(itemRef)]);
-        return { itemRef, metadata, url };
+        const metadata = await getMetadata(itemRef);
+        return { itemRef, metadata, url: '' };
       })
     );
     const folderRows = await resolveFolderRows(listing.prefixes);

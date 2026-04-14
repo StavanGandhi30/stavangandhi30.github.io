@@ -1,5 +1,5 @@
 export const MAILTO_MAX = 1900;
-const URLS_JSON_PATH = 'data/urls.json';
+const SOCIAL_JSON_PATH = 'data/social.json';
 let siteUrlsPromise = null;
 
 export function formatPostDate(iso) {
@@ -61,7 +61,7 @@ export async function loadSiteJson(relPath) {
 
 export async function loadSiteUrls() {
   if (!siteUrlsPromise) {
-    siteUrlsPromise = loadSiteJson(URLS_JSON_PATH).catch(() => ({}));
+    siteUrlsPromise = loadSiteJson(SOCIAL_JSON_PATH).catch(() => ({}));
   }
   return siteUrlsPromise;
 }

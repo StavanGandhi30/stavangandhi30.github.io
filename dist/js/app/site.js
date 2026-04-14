@@ -72,6 +72,8 @@ function initAmbientAudio() {
   const hint = document.querySelector('[data-ambient-hint]');
   if (!audio || !powerBtn || !muteBtn || !vol) return;
 
+  audio.loop = true;
+
   const setPanelExpanded = (expanded) => {
     if (panel) {
       panel.classList.toggle('ambient-audio-panel--collapsed', !expanded);
@@ -144,6 +146,7 @@ function initAmbientAudio() {
       return;
     }
     try {
+      audio.loop = true;
       await audio.play();
       setPower(true);
     } catch {
