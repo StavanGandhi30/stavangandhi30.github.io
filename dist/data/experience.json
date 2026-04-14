@@ -56,7 +56,7 @@
         "slides": [
           {
             "type": "video",
-            "src": "videos/DePaulBCI.mp4",
+            "srcKey": "dePaulBCIVideo",
             "loop": true,
             "poster": "images/photos/research-bci-cobot.png",
             "ariaLabel": "Brain-computer interface lab demo video",

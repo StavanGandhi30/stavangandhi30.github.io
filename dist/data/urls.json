@@ -5,6 +5,9 @@
   "linkedinProfile": "https://www.linkedin.com/in/StavanGandhi30",
   "githubProfile": "https://github.com/StavanGandhi30",
   
-  "ambientAudioTrack": "https://firebasestorage.googleapis.com/v0/b/shivgandhi30.firebasestorage.app/o/audio%2FFluteAudio.mp3?alt=media&token=1dccceca-4562-4a9c-9541-1181bb6891de",
-  "humanoidResearchVideo": "https://firebasestorage.googleapis.com/v0/b/shivgandhi30.firebasestorage.app/o/video%2FHumanoid.mp4?alt=media&token=4d94bb7f-8b06-4a23-b47b-c1c5cf37dcde"
+  "ambientAudioTrack": "https://firebasestorage.googleapis.com/v0/b/shivgandhi30.firebasestorage.app/o/public%2Faudio%2FFluteAudio.mp3?alt=media&token=b930a4f8-a59e-4817-8b83-219f06bbbbe6",
+  "humanoidResearchVideo": "https://firebasestorage.googleapis.com/v0/b/shivgandhi30.firebasestorage.app/o/public%2Fvideo%2FHumanoid.mp4?alt=media&token=6c6c39a8-02f1-4b36-ade2-abfff9fe5d3e",
+  "gananceVideo": "https://firebasestorage.googleapis.com/v0/b/shivgandhi30.firebasestorage.app/o/public%2Fvideo%2Fganance.mp4?alt=media&token=4d90a762-c2f3-4718-9508-eded808e0023",
+  "dePaulBCIVideo": "https://firebasestorage.googleapis.com/v0/b/shivgandhi30.firebasestorage.app/o/public%2Fvideo%2FdePaulBCI.mp4?alt=media&token=6e3beb41-eb91-4072-be64-33941d85cadd",
+  "resumePdf": "https://firebasestorage.googleapis.com/v0/b/shivgandhi30.firebasestorage.app/o/public%2Fdocument%2Fresume.pdf?alt=media&token=225c8eba-29f8-47c7-bdd9-c3164e2f1081"
 }

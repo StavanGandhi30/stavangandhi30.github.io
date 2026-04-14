@@ -1,27 +1,27 @@
 {
   "posts": [
     {
-      "srcKey": "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7384682943434276864?collapsed=1",
+      "src": "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7384682943434276864?collapsed=1",
       "width": 504,
       "height": 894
     },
     {
-      "srcKey": "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7348470397782126592?collapsed=1",
+      "src": "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7348470397782126592?collapsed=1",
       "width": 504,
       "height": 840
     },
     {
-      "srcKey": "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7331886700194856960?collapsed=1",
+      "src": "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7331886700194856960?collapsed=1",
       "width": 720,
       "height": 610
     },
     {
-      "srcKey": "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7324183374879764480?collapsed=1",
+      "src": "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7324183374879764480?collapsed=1",
       "width": 720,
       "height": 610
     },
     {
-      "srcKey": "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7319445222793330688?collapsed=1",
+      "src": "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7319445222793330688?collapsed=1",
       "width": 720,
       "height": 610
     }
