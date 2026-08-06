@@ -196,7 +196,7 @@ details.blog-post > summary {
       }
 
       #about {
-        background: linear-gradient(180deg, rgb(245 245 244 / 0.55) 0%, transparent 70%);
+        background: linear-gradient(180deg, rgba(61, 61, 48, 0.55) 0%, transparent 70%);
       }
 
       #building {
