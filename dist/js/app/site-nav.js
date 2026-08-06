@@ -1,4 +1,3 @@
-const THEME_KEY = 'sg-theme';
 const NAV_ACTIVATION_BELOW_HEADER_PX = 100;
 
 /** Section `id` → nav key when it differs from the section id. */
@@ -55,30 +54,6 @@ function sectionInViewForNav() {
 function syncNavFromScroll() {
   const chosen = sectionInViewForNav();
   if (chosen) setActiveNav(navKeyForSectionId(chosen.id));
-}
-
-export function initTheme() {
-  const getPreferred = () => {
-    const stored = localStorage.getItem(THEME_KEY);
-    if (stored === 'dark' || stored === 'light') return stored;
-    if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
-    return 'light';
-  };
-  const apply = (theme) => {
-    const root = document.documentElement;
-    if (theme === 'dark') root.classList.add('dark');
-    else root.classList.remove('dark');
-    localStorage.setItem(THEME_KEY, theme);
-    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
-      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-    });
-  };
-  apply(getPreferred());
-  document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      apply(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
-    });
-  });
 }
 
 export function initSectionNav() {
