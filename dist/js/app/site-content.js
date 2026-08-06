@@ -673,7 +673,8 @@ export async function initBlog() {
       .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     if (!posts.length) {
-      root.innerHTML = '<p class="text-sm text-stone-500">No posts yet.</p>';
+      root.innerHTML =
+        '<p class="text-sm text-stone-500">Coming soon — check back for explainers and notes.</p>';
       rafFade();
       return;
     }
